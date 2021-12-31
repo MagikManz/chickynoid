@@ -259,8 +259,13 @@ function Simulation:DoGroundCheck(pos, feetHeight)
     return onGround, onLedge
 end
 
+-- get the collision group name
+function Simulation:GetCollisionGroupName()
+    return self._collisionGroupName
+end
+
 -- Set collision group for the Simulation
-function Simulation:SetCollisionGroup(name)
+function Simulation:SetCollisionGroupName(name)
     local collisionGroupID, _error = pcall(PhysicsService.CreateCollisionGroup, PhysicsService, name)
     if type(collisionGroupID) ~= "number" then
         collisionGroupID = PhysicsService:GetCollisionGroupId(name)
