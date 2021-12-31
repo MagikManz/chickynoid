@@ -78,8 +78,11 @@ function SweepModule:GetDepth(centerOfSphere, radius, rayPos, rayUnitDir)
     return a + f
 end
 
-function SweepModule:CanCollide(BasePart: BasePart)
-    
+function SweepModule:CanCollide(basePart: BasePart)
+    if basePart.CanCollide == false then return false end
+
+    local partCollisionGroup = PhysicsService:GetCollisionGroupName(basePart.CollisionGroupId)
+    return PhysicsService:CollisionGroupsAreCollidable(self.collisionGroupName, partCollisionGroup)
 end
 
 function SweepModule:SweepForContacts(startPos, endPos, whiteList) --radius is fixed to 2.5
@@ -118,12 +121,8 @@ function SweepModule:SweepForContacts(startPos, endPos, whiteList) --radius is f
             local instance = raycastResult.Instance :: BasePart
 
             --don't collide with things that do not collide
-            if instance.ClassName ~= "Terrain" then
-                if instance.CanCollide == false then
-                    continue
-                elseif PhysicsService:CollisionGroupsAreCollidable(self.collisionGroupName, PhysicsService:GetCollisionGroupName(instance.CollisionGroupId)) then
-                    continue
-                end
+            if instance.ClassName ~= "Terrain" and self:CanCollide(instance) == false then
+                continue
             end
 
             table.insert(contacts, raycastResult)
@@ -203,7 +202,7 @@ function SweepModule:Sweep(startPos, endPos, whiteList) --radius is fixed to 2.5
             end
 
             local instance = raycastResult.Instance
-            if instance.ClassName ~= "Terrain" and instance.CanCollide == false then
+            if instance.ClassName ~= "Terrain" and self:CanCollide(instance) == false then
                 continue
             end
 
