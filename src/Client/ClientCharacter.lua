@@ -36,7 +36,7 @@ function ClientCharacter.new(player: Player, position: Vector3)
     }, ClientCharacter)
 
     self._simulation.pos = position
-    self._simulation.whiteList = { workspace.GameArea:GetDescendants(), workspace.Terrain }
+    self._simulation.ignoreList = { workspace.Ignore }
 
     if player == LocalPlayer then
         self:_handleLocalPlayer()
