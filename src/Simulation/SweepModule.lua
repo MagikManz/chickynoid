@@ -6,8 +6,8 @@ local rings = {}
 
 local debug = 0
 SweepModule.raycastsThisFrame = 0
-SweepModule.collisionGroupName = "Default"
-SweepModule.collisionGroupId = PhysicsService:GetCollisionGroupId(SweepModule.collisionGroupName)
+SweepModule._collisionGroupName = "Default"
+SweepModule._collisionGroupId = PhysicsService:GetCollisionGroupId(SweepModule._collisionGroupName)
 
 local constants = {}
 constants.radius = 2.5
@@ -78,11 +78,23 @@ function SweepModule:GetDepth(centerOfSphere, radius, rayPos, rayUnitDir)
     return a + f
 end
 
+-- Whether or not the "Sphere" can collide with something
 function SweepModule:CanCollide(basePart: BasePart)
     if basePart.CanCollide == false then return false end
 
     local partCollisionGroup = PhysicsService:GetCollisionGroupName(basePart.CollisionGroupId)
-    return PhysicsService:CollisionGroupsAreCollidable(self.collisionGroupName, partCollisionGroup)
+    return PhysicsService:CollisionGroupsAreCollidable(self._collisionGroupName, partCollisionGroup)
+end
+
+-- Set collision group for the "Sphere"
+function SweepModule:SetCollisionGroup(name)
+    local collisionGroupID, _error = pcall(PhysicsService.CreateCollisionGroup, PhysicsService, name)
+    if type(collisionGroupID) ~= "number" then
+        collisionGroupID = PhysicsService:GetCollisionGroupId(name)
+    end
+
+    self._collisionGroupId = collisionGroupID
+    self._collisionGroupName = name
 end
 
 function SweepModule:SweepForContacts(startPos, endPos, whiteList) --radius is fixed to 2.5
