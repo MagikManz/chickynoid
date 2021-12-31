@@ -67,6 +67,24 @@ function SweepModule:DebugBeam(a, b, color)
     part.Parent = game.Workspace.DebugMarkers
 end
 
+local function collisionCast(origin: Vector3, direction: Vector3, raycastParams: RaycastParams)
+    local raycastResult = workspace:Raycast(origin, direction, raycastParams)
+    if raycastResult then
+        local instance = raycastResult.Instance :: BasePart
+
+        --don't collide with things that do not collide, filter out terrain cells completely
+        if instance:IsA("Terrain") == false and SweepModule:CanCollide(instance) == false then
+            local whitelist = raycastParams.FilterDescendantsInstances
+            table.remove(whitelist, table.find(whitelist, instance)) -- remove the part that shouldn't collide
+            print("coldn't collide noo")
+            raycastParams.FilterDescendantsInstances = whitelist
+            return collisionCast(origin, direction, raycastParams)
+        end
+    end
+
+    return raycastResult
+end
+
 --Short version of ray/sphere intersection test that assumes the ray is going to either miss completely or hit the inside, perfect for capsules.
 function SweepModule:GetDepth(centerOfSphere, radius, rayPos, rayUnitDir)
     local e = centerOfSphere - rayPos
@@ -122,19 +140,12 @@ function SweepModule:SweepForContacts(startPos, endPos, whiteList) --radius is f
         --Calculate the distance for this point along the ray to the back of the sphere (how much the ray has to be extended by to reach the other side)
         local dist = self:GetDepth(startPos, constants.radius, castPoint, ray)
 
-        local raycastResult = workspace:Raycast(castPoint, (ray * (mag + dist)), raycastParams)
+        local raycastResult = collisionCast(castPoint, (ray * (mag + dist)), raycastParams) --workspace:Raycast(castPoint, (ray * (mag + dist)), raycastParams)
         self.raycastsThisFrame += 1
 
         if raycastResult then
             --don't collide with orthogonal stuff
             if raycastResult.Normal:Dot(ray) > -0.00001 then
-                continue
-            end
-
-            local instance = raycastResult.Instance :: BasePart
-
-            --don't collide with things that do not collide
-            if instance.ClassName ~= "Terrain" and self:CanCollide(instance) == false then
                 continue
             end
 
@@ -201,7 +212,7 @@ function SweepModule:Sweep(startPos, endPos, whiteList) --radius is fixed to 2.5
         --Calculate the distance for this point along the ray to the back of the sphere (how much the ray has to be extended by to reach the other side)
         local dist = self:GetDepth(startPos, constants.radius, castPoint, ray)
 
-        local raycastResult = workspace:Raycast(castPoint, (ray * (mag + dist)), raycastParams)
+        local raycastResult = collisionCast(castPoint, (ray * (mag + dist)), raycastParams) --workspace:Raycast(castPoint, (ray * (mag + dist)), raycastParams)
         self.raycastsThisFrame += 1
 
         if debug >= 1 then
@@ -212,13 +223,6 @@ function SweepModule:Sweep(startPos, endPos, whiteList) --radius is fixed to 2.5
         if raycastResult then
             if debug >= 1 then
                 self:DebugBeam(castPoint, raycastResult.Position, Color3.new(1, 1, 0))
-            end
-
-            -- collision check so we repeat
-
-            local instance = raycastResult.Instance
-            if instance.ClassName ~= "Terrain" and self:CanCollide(instance) == false then
-                continue
             end
 
             --don't collide with orthogonal stuff
