@@ -1,13 +1,9 @@
-local PhysicsService = game:GetService("PhysicsService")
-
 local SweepModule = {}
 
 local rings = {}
 
 local debug = 0
 SweepModule.raycastsThisFrame = 0
-SweepModule._collisionGroupName = "Default"
-SweepModule._collisionGroupId = PhysicsService:GetCollisionGroupId(SweepModule._collisionGroupName)
 
 local constants = {}
 constants.radius = 2.5
