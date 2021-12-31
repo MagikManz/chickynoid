@@ -104,6 +104,7 @@ function SweepModule:SweepForContacts(startPos, endPos, whiteList) --radius is f
     raycastParams.FilterType = Enum.RaycastFilterType.Whitelist
     raycastParams.FilterDescendantsInstances = whiteList
     raycastParams.IgnoreWater = true
+    raycastParams.CollisionGroup = self._collisionGroupName
 
     local contacts = {}
 
@@ -179,6 +180,7 @@ function SweepModule:Sweep(startPos, endPos, whiteList) --radius is fixed to 2.5
     raycastParams.FilterType = Enum.RaycastFilterType.Whitelist
     raycastParams.FilterDescendantsInstances = whiteList
     raycastParams.IgnoreWater = true
+    raycastParams.CollisionGroup = self._collisionGroupName
 
     -- Cast the ray
 
@@ -207,11 +209,12 @@ function SweepModule:Sweep(startPos, endPos, whiteList) --radius is fixed to 2.5
         end
 
 
-
         if raycastResult then
             if debug >= 1 then
                 self:DebugBeam(castPoint, raycastResult.Position, Color3.new(1, 1, 0))
             end
+
+            -- collision check so we repeat
 
             local instance = raycastResult.Instance
             if instance.ClassName ~= "Terrain" and self:CanCollide(instance) == false then
