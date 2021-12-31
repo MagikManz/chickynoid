@@ -12,7 +12,7 @@ function Simulation.new()
     --power of jumping left
     self.jump = 0
 
-    self.ignoreList = { workspace.Ignore }
+    self.ignoreList = { workspace.Ignore, workspace:FindFirstChild("DebugMarkers") }
 
     --players feet height - height goes from -2.5 to +2.5
     --So any point below this number is considered the players feet
@@ -148,7 +148,7 @@ function Simulation:ProcessCommand(cmd)
     -- Do we even need to?
     if (onGround ~= nil or onLedge ~= nil) and hitSomething == true then
         --first move upwards as high as we can go
-        local headHit = self.sweepModule:Sweep(self.pos, self.pos + Vector3.new(0, self.stepSize, 0), self.whiteList)
+        local headHit = self.sweepModule:Sweep(self.pos, self.pos + Vector3.new(0, self.stepSize, 0), self.ignoreList)
 
         --Project forwards
         local stepUpNewPos, stepUpNewVel, stepHitSomething = self:ProjectVelocity(headHit.endPos, flatVel)
@@ -159,7 +159,7 @@ function Simulation:ProcessCommand(cmd)
         local hitResult = self.sweepModule:Sweep(
             traceDownPos,
             traceDownPos - Vector3.new(0, self.stepSize, 0),
-            self.whiteList
+            self.ignoreList
         )
 
         stepUpNewPos = hitResult.endPos
@@ -226,7 +226,7 @@ function Simulation:Destroy()
 end
 
 function Simulation:DoGroundCheck(pos, feetHeight)
-    local contacts = self.sweepModule:SweepForContacts(pos, pos + Vector3.new(0, -0.1, 0), self.whiteList)
+    local contacts = self.sweepModule:SweepForContacts(pos, pos + Vector3.new(0, -0.1, 0), self.ignoreList)
     local onGround = nil
     local onLedge = nil
 
@@ -287,7 +287,7 @@ function Simulation:ProjectVelocity(startPos, startVel)
             break
         end
 
-        local result = self.sweepModule:Sweep(movePos, movePos + moveVel, self.whiteList)
+        local result = self.sweepModule:Sweep(movePos, movePos + moveVel, self.ignoreList)
 
         if result.fraction < 1 then
             hitSomething = true
