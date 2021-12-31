@@ -256,9 +256,6 @@ function Simulation:DoGroundCheck(pos, feetHeight)
         end
     end
 
-    if onLedge then
-    warn("ON LEDGE!", onLedge)
-    end
     return onGround, onLedge
 end
 

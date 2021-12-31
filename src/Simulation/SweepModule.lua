@@ -73,7 +73,6 @@ local function collisionCast(origin: Vector3, direction: Vector3, raycastParams:
         --don't collide with things that do not collide, filter out terrain cells completely
         if instance:IsA("Terrain") == false and SweepModule:CanCollide(collisionGroup, instance) == false then
             local ignoreList = raycastParams.FilterDescendantsInstances
-            print("coldn't collide noo")
             table.insert(ignoreList, instance)
 
             raycastParams.FilterDescendantsInstances = ignoreList
