@@ -1,3 +1,5 @@
+local PhysicsService = game:GetService("PhysicsService")
+
 local SweepModule = {}
 
 local rings = {}
@@ -63,17 +65,18 @@ function SweepModule:DebugBeam(a, b, color)
     part.Parent = game.Workspace.DebugMarkers
 end
 
-local function collisionCast(origin: Vector3, direction: Vector3, raycastParams: RaycastParams)
+local function collisionCast(origin: Vector3, direction: Vector3, raycastParams: RaycastParams, collisionGroup: string)
     local raycastResult = workspace:Raycast(origin, direction, raycastParams)
     if raycastResult then
         local instance = raycastResult.Instance :: BasePart
 
         --don't collide with things that do not collide, filter out terrain cells completely
-        if instance:IsA("Terrain") == false and SweepModule:CanCollide(instance) == false then
-            local whitelist = raycastParams.FilterDescendantsInstances
-            table.remove(whitelist, table.find(whitelist, instance)) -- remove the part that shouldn't collide
+        if instance:IsA("Terrain") == false and SweepModule:CanCollide(collisionGroup, instance) == false then
+            local ignoreList = raycastParams.FilterDescendantsInstances
             print("coldn't collide noo")
-            raycastParams.FilterDescendantsInstances = whitelist
+            table.insert(ignoreList, instance)
+
+            raycastParams.FilterDescendantsInstances = ignoreList
             return collisionCast(origin, direction, raycastParams)
         end
     end
@@ -93,11 +96,11 @@ function SweepModule:GetDepth(centerOfSphere, radius, rayPos, rayUnitDir)
 end
 
 -- Whether or not the "Sphere" can collide with something
-function SweepModule:CanCollide(basePart: BasePart)
+function SweepModule:CanCollide(collisionGroup: string, basePart: BasePart)
     if basePart.CanCollide == false then return false end
 
     local partCollisionGroup = PhysicsService:GetCollisionGroupName(basePart.CollisionGroupId)
-    return PhysicsService:CollisionGroupsAreCollidable(self._collisionGroupName, partCollisionGroup)
+    return PhysicsService:CollisionGroupsAreCollidable(collisionGroup, partCollisionGroup)
 end
 
 -- Set collision group for the "Sphere"
@@ -111,12 +114,12 @@ function SweepModule:SetCollisionGroup(name)
     self._collisionGroupName = name
 end
 
-function SweepModule:SweepForContacts(startPos, endPos, whiteList) --radius is fixed to 2.5
+function SweepModule:SweepForContacts(startPos, endPos, ignoreList) --radius is fixed to 2.5
     --Cast a bunch of rays
 
     local raycastParams = RaycastParams.new()
-    raycastParams.FilterType = Enum.RaycastFilterType.Whitelist
-    raycastParams.FilterDescendantsInstances = whiteList
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.FilterDescendantsInstances = ignoreList
     raycastParams.IgnoreWater = true
     raycastParams.CollisionGroup = self._collisionGroupName
 
@@ -153,7 +156,7 @@ end
 
 --Returns position, normal, time
 
-function SweepModule:Sweep(startPos, endPos, whiteList) --radius is fixed to 2.5
+function SweepModule:Sweep(startPos, endPos, ignoreList) --radius is fixed to 2.5
     local debugMarkers = game.Workspace:FindFirstChild("DebugMarkers")
     if debugMarkers == nil then
         debugMarkers = Instance.new("Folder")
@@ -184,8 +187,8 @@ function SweepModule:Sweep(startPos, endPos, whiteList) --radius is fixed to 2.5
     --Cast a bunch of rays
 
     local raycastParams = RaycastParams.new()
-    raycastParams.FilterType = Enum.RaycastFilterType.Whitelist
-    raycastParams.FilterDescendantsInstances = whiteList
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.FilterDescendantsInstances = ignoreList
     raycastParams.IgnoreWater = true
     raycastParams.CollisionGroup = self._collisionGroupName
 
