@@ -1,3 +1,7 @@
+local PhysicsService = game:GetService("PhysicsService")
+
+local DEFAULT_COLLISION_GROUP = "Default"
+
 local Simulation = {}
 Simulation.__index = Simulation
 
@@ -24,6 +28,10 @@ function Simulation.new()
 
     --Scale for making units in "units per second"
     self.perSecond = 1 / 60
+
+    -- collision group
+    self._collisionGroupName = DEFAULT_COLLISION_GROUP
+    self._collisionGroupId = PhysicsService:GetCollisionGroupId(DEFAULT_COLLISION_GROUP)
 
     local buildDebugSphereModelThing = true
 
@@ -148,7 +156,7 @@ function Simulation:ProcessCommand(cmd)
     -- Do we even need to?
     if (onGround ~= nil or onLedge ~= nil) and hitSomething == true then
         --first move upwards as high as we can go
-        local headHit = self.sweepModule:Sweep(self.pos, self.pos + Vector3.new(0, self.stepSize, 0), self.ignoreList)
+        local headHit = self.sweepModule:Sweep(self.pos, self.pos + Vector3.new(0, self.stepSize, 0), self.ignoreList, self._collisionGroupName)
 
         --Project forwards
         local stepUpNewPos, stepUpNewVel, stepHitSomething = self:ProjectVelocity(headHit.endPos, flatVel)
@@ -159,7 +167,8 @@ function Simulation:ProcessCommand(cmd)
         local hitResult = self.sweepModule:Sweep(
             traceDownPos,
             traceDownPos - Vector3.new(0, self.stepSize, 0),
-            self.ignoreList
+            self.ignoreList,
+            self._collisionGroupName
         )
 
         stepUpNewPos = hitResult.endPos
@@ -226,7 +235,7 @@ function Simulation:Destroy()
 end
 
 function Simulation:DoGroundCheck(pos, feetHeight)
-    local contacts = self.sweepModule:SweepForContacts(pos, pos + Vector3.new(0, -0.1, 0), self.ignoreList)
+    local contacts = self.sweepModule:SweepForContacts(pos, pos + Vector3.new(0, -0.1, 0), self.ignoreList, self._collisionGroupName)
     local onGround = nil
     local onLedge = nil
 
@@ -251,6 +260,17 @@ function Simulation:DoGroundCheck(pos, feetHeight)
     warn("ON LEDGE!", onLedge)
     end
     return onGround, onLedge
+end
+
+-- Set collision group for the Simulation
+function Simulation:SetCollisionGroup(name)
+    local collisionGroupID, _error = pcall(PhysicsService.CreateCollisionGroup, PhysicsService, name)
+    if type(collisionGroupID) ~= "number" then
+        collisionGroupID = PhysicsService:GetCollisionGroupId(name)
+    end
+
+    self._collisionGroupId = collisionGroupID
+    self._collisionGroupName = name
 end
 
 function Simulation:ClipVelocity(input, normal, overbounce)
@@ -287,7 +307,7 @@ function Simulation:ProjectVelocity(startPos, startVel)
             break
         end
 
-        local result = self.sweepModule:Sweep(movePos, movePos + moveVel, self.ignoreList)
+        local result = self.sweepModule:Sweep(movePos, movePos + moveVel, self.ignoreList, self._collisionGroupName)
 
         if result.fraction < 1 then
             hitSomething = true
