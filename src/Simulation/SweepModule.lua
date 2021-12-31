@@ -103,25 +103,14 @@ function SweepModule:CanCollide(collisionGroup: string, basePart: BasePart)
     return PhysicsService:CollisionGroupsAreCollidable(collisionGroup, partCollisionGroup)
 end
 
--- Set collision group for the "Sphere"
-function SweepModule:SetCollisionGroup(name)
-    local collisionGroupID, _error = pcall(PhysicsService.CreateCollisionGroup, PhysicsService, name)
-    if type(collisionGroupID) ~= "number" then
-        collisionGroupID = PhysicsService:GetCollisionGroupId(name)
-    end
-
-    self._collisionGroupId = collisionGroupID
-    self._collisionGroupName = name
-end
-
-function SweepModule:SweepForContacts(startPos, endPos, ignoreList) --radius is fixed to 2.5
+function SweepModule:SweepForContacts(startPos, endPos, ignoreList, collisionGroup) --radius is fixed to 2.5
     --Cast a bunch of rays
 
     local raycastParams = RaycastParams.new()
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
     raycastParams.FilterDescendantsInstances = ignoreList
     raycastParams.IgnoreWater = true
-    raycastParams.CollisionGroup = self._collisionGroupName
+    raycastParams.CollisionGroup = collisionGroup
 
     local contacts = {}
 
@@ -139,7 +128,7 @@ function SweepModule:SweepForContacts(startPos, endPos, ignoreList) --radius is 
         --Calculate the distance for this point along the ray to the back of the sphere (how much the ray has to be extended by to reach the other side)
         local dist = self:GetDepth(startPos, constants.radius, castPoint, ray)
 
-        local raycastResult = collisionCast(castPoint, (ray * (mag + dist)), raycastParams) --workspace:Raycast(castPoint, (ray * (mag + dist)), raycastParams)
+        local raycastResult = collisionCast(castPoint, (ray * (mag + dist)), raycastParams, collisionGroup) --workspace:Raycast(castPoint, (ray * (mag + dist)), raycastParams)
         self.raycastsThisFrame += 1
 
         if raycastResult then
@@ -156,7 +145,7 @@ end
 
 --Returns position, normal, time
 
-function SweepModule:Sweep(startPos, endPos, ignoreList) --radius is fixed to 2.5
+function SweepModule:Sweep(startPos, endPos, ignoreList, collisionGroup) --radius is fixed to 2.5
     local debugMarkers = game.Workspace:FindFirstChild("DebugMarkers")
     if debugMarkers == nil then
         debugMarkers = Instance.new("Folder")
@@ -211,7 +200,7 @@ function SweepModule:Sweep(startPos, endPos, ignoreList) --radius is fixed to 2.
         --Calculate the distance for this point along the ray to the back of the sphere (how much the ray has to be extended by to reach the other side)
         local dist = self:GetDepth(startPos, constants.radius, castPoint, ray)
 
-        local raycastResult = collisionCast(castPoint, (ray * (mag + dist)), raycastParams) --workspace:Raycast(castPoint, (ray * (mag + dist)), raycastParams)
+        local raycastResult = collisionCast(castPoint, (ray * (mag + dist)), raycastParams, collisionGroup) --workspace:Raycast(castPoint, (ray * (mag + dist)), raycastParams)
         self.raycastsThisFrame += 1
 
         if debug >= 1 then
