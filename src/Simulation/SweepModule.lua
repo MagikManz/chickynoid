@@ -77,7 +77,7 @@ local function collisionCast(origin: Vector3, direction: Vector3, raycastParams:
             table.insert(ignoreList, instance)
 
             raycastParams.FilterDescendantsInstances = ignoreList
-            return collisionCast(origin, direction, raycastParams)
+            return collisionCast(origin, direction, raycastParams, collisionGroup)
         end
     end
 
@@ -146,13 +146,7 @@ end
 --Returns position, normal, time
 
 function SweepModule:Sweep(startPos, endPos, ignoreList, collisionGroup) --radius is fixed to 2.5
-    local debugMarkers = game.Workspace:FindFirstChild("DebugMarkers")
-    if debugMarkers == nil then
-        debugMarkers = Instance.new("Folder")
-        debugMarkers.Name = "DebugMarkers"
-        debugMarkers.Parent = game.Workspace
-    end
-    debugMarkers:ClearAllChildren()
+    local debugMarkers = workspace.Ignore
 
     --early out
     local rayVec = (endPos - startPos)
@@ -179,7 +173,7 @@ function SweepModule:Sweep(startPos, endPos, ignoreList, collisionGroup) --radiu
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
     raycastParams.FilterDescendantsInstances = ignoreList
     raycastParams.IgnoreWater = true
-    raycastParams.CollisionGroup = self._collisionGroupName
+    raycastParams.CollisionGroup = collisionGroup
 
     -- Cast the ray
 

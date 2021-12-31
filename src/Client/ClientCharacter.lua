@@ -13,9 +13,7 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerModule = LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")
 local ControlModule = require(PlayerModule:WaitForChild("ControlModule"))
 
-local DebugParts = Instance.new("Folder")
-DebugParts.Name = "DebugParts"
-DebugParts.Parent = workspace
+local DebugParts = workspace.Ignore
 
 local SKIP_RESIMULATION = true
 local DEBUG_SPHERES = true
@@ -36,7 +34,7 @@ function ClientCharacter.new(player: Player, position: Vector3)
     }, ClientCharacter)
 
     self._simulation.pos = position
-    self._simulation.ignoreList = { workspace.Ignore, workspace:FindFirstChild("DebugMarkers") }
+    self._simulation.ignoreList = { workspace.Ignore }
 
     if player == LocalPlayer then
         self:_handleLocalPlayer()

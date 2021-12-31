@@ -16,7 +16,7 @@ function Simulation.new()
     --power of jumping left
     self.jump = 0
 
-    self.ignoreList = { workspace.Ignore, workspace:FindFirstChild("DebugMarkers") }
+    self.ignoreList = { workspace.Ignore }
 
     --players feet height - height goes from -2.5 to +2.5
     --So any point below this number is considered the players feet
