@@ -1,9 +1,13 @@
+local PhysicsService = game:GetService("PhysicsService")
+
 local SweepModule = {}
 
 local rings = {}
 
 local debug = 0
 SweepModule.raycastsThisFrame = 0
+SweepModule.collisionGroupName = "Default"
+SweepModule.collisionGroupId = PhysicsService:GetCollisionGroupId(SweepModule.collisionGroupName)
 
 local constants = {}
 constants.radius = 2.5
@@ -74,6 +78,10 @@ function SweepModule:GetDepth(centerOfSphere, radius, rayPos, rayUnitDir)
     return a + f
 end
 
+function SweepModule:CanCollide(BasePart: BasePart)
+    
+end
+
 function SweepModule:SweepForContacts(startPos, endPos, whiteList) --radius is fixed to 2.5
     --Cast a bunch of rays
 
@@ -88,7 +96,7 @@ function SweepModule:SweepForContacts(startPos, endPos, whiteList) --radius is f
     local mag = rayVec.Magnitude
     local ray = rayVec.Unit
 
-    for key, value in pairs(rings) do
+    for _, value in pairs(rings) do
         if value:Dot(ray) > 0 then --We cast using the rays on the back of the sphere
             continue
         end
@@ -106,6 +114,18 @@ function SweepModule:SweepForContacts(startPos, endPos, whiteList) --radius is f
             if raycastResult.Normal:Dot(ray) > -0.00001 then
                 continue
             end
+
+            local instance = raycastResult.Instance :: BasePart
+
+            --don't collide with things that do not collide
+            if instance.ClassName ~= "Terrain" then
+                if instance.CanCollide == false then
+                    continue
+                elseif PhysicsService:CollisionGroupsAreCollidable(self.collisionGroupName, PhysicsService:GetCollisionGroupName(instance.CollisionGroupId)) then
+                    continue
+                end
+            end
+
             table.insert(contacts, raycastResult)
         end
     end
@@ -175,9 +195,16 @@ function SweepModule:Sweep(startPos, endPos, whiteList) --radius is fixed to 2.5
             self:DebugMarker(castPoint + (ray * (dist + mag)), Color3.new(1, 0, 1))
         end
 
+
+
         if raycastResult then
             if debug >= 1 then
                 self:DebugBeam(castPoint, raycastResult.Position, Color3.new(1, 1, 0))
+            end
+
+            local instance = raycastResult.Instance
+            if instance.ClassName ~= "Terrain" and instance.CanCollide == false then
+                continue
             end
 
             --don't collide with orthogonal stuff
