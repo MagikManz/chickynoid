@@ -12,7 +12,7 @@ function Simulation.new()
     --power of jumping left
     self.jump = 0
 
-    self.whiteList = { game.Workspace:GetDescendants() }
+    self.ignoreList = { workspace.Ignore }
 
     --players feet height - height goes from -2.5 to +2.5
     --So any point below this number is considered the players feet
@@ -47,7 +47,7 @@ function Simulation.new()
         part.Color = Color3.new(0, 1, 1)
 
         model.PrimaryPart = part
-        model.Parent = game.Workspace
+        model.Parent = workspace.Ignore
         self.debugModel = model
 
         local debugPart = Instance.new("Part")
