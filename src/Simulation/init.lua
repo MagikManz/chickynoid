@@ -12,7 +12,7 @@ function Simulation.new()
     --power of jumping left
     self.jump = 0
 
-    self.whiteList = { game.Workspace }
+    self.whiteList = { game.Workspace:GetDescendants() }
 
     --players feet height - height goes from -2.5 to +2.5
     --So any point below this number is considered the players feet
@@ -245,6 +245,10 @@ function Simulation:DoGroundCheck(pos, feetHeight)
         if onGround and onLedge then
             return onGround, onLedge
         end
+    end
+
+    if onLedge then
+    warn("ON LEDGE!", onLedge)
     end
     return onGround, onLedge
 end
