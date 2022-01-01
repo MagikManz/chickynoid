@@ -46,7 +46,7 @@ function ChickynoidClient.Setup()
 
     ClientTransport:OnEventTypeReceived(EventType.State, function(event)
         local character = ChickynoidClient._characters[event.player]
-        if character then
+        if character and event.lastConfirmed then
             character:HandleNewState(event.state, event.lastConfirmed)
         end
     end)

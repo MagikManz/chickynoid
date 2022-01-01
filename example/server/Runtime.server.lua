@@ -12,4 +12,8 @@ Players.PlayerAdded:Connect(function(player)
     RunService.Heartbeat:Connect(function()
         character:Heartbeat()
     end)
+
+    -- while wait(10) do
+    --     character:SetPosition(Vector3.new(0, 100, 0))
+    -- end
 end)
