@@ -1,3 +1,13 @@
+--!strict
+
+--[=[
+    @class ClientCharacter
+    @client
+
+    A character class that handles character rendering and other tasks on the
+    client. Designed to handle characters for the local player and other players.
+]=]
+
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 
@@ -24,6 +34,14 @@ local PRINT_NUM_CASTS = false
 local ClientCharacter = {}
 ClientCharacter.__index = ClientCharacter
 
+--[=[
+    Constructs a new ClientCharacter for a player, spawning it at the specified
+    position.
+
+    @param player Player -- The player this character belongs to. Used to derive its [HumanoidDescription] and other things.
+    @param position Vector3 -- The position to spawn this character, provided by the server.
+    @return ClientCharacter
+]=]
 function ClientCharacter.new(player: Player, position: Vector3)
     local self = setmetatable({
         _player = player,
@@ -85,6 +103,13 @@ function ClientCharacter:_calculateRawMoveVector(cameraRelativeMoveVector: Vecto
     return CFrame.fromEulerAnglesYXZ(0, yaw, 0) * Vector3.new(cameraRelativeMoveVector.X, 0, cameraRelativeMoveVector.Z)
 end
 
+--[=[
+    The server sends each client an updated world state on a fixed timestep. This
+    handles state updates for this character.
+
+    @param state table -- The new state sent by the server.
+    @param lastConfirmed number -- The serial number of the last command confirmed by the server.
+]=]
 function ClientCharacter:HandleNewState(state: table, lastConfirmed: number)
     self:_clearDebugSpheres()
 
