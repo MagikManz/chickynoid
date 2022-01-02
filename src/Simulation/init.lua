@@ -1,9 +1,16 @@
+--[=[
+    @class Simulation
+    Simulation handles physics for characters on both the client and server.
+]=]
+
+local Types = require(script.Parent.Types)
+
 local Simulation = {}
 Simulation.__index = Simulation
 
 Simulation.sweepModule = require(script.SweepModule)
 
-function Simulation.new()
+function Simulation.new(config: Types.ISimulationConfig)
     local self = setmetatable({}, Simulation)
 
     self.pos = Vector3.new(0, 5, 0)
@@ -12,15 +19,15 @@ function Simulation.new()
     --power of jumping left
     self.jump = 0
 
-    self.whiteList = { game.Workspace }
+    self.whiteList = config.raycastWhitelist
 
     --players feet height - height goes from -2.5 to +2.5
     --So any point below this number is considered the players feet
     --the distance between middle and feetHeight is "ledge"
-    self.feetHeight = -1.9
+    self.feetHeight = config.feetHeight
 
     -- How big an object we can step over
-    self.stepSize = 2.1
+    self.stepSize = config.stepSize
 
     --Scale for making units in "units per second"
     self.perSecond = 1 / 60

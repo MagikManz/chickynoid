@@ -4,6 +4,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Packages = ReplicatedStorage.Packages
 
 local Chickynoid = require(Packages.Chickynoid.Server)
+
+Chickynoid.SetConfig({
+    simulationConfig = {
+        -- stepSize = 3,
+    },
+})
+
 Chickynoid.Setup()
 
 Players.PlayerAdded:Connect(function(player)

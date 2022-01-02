@@ -14,6 +14,7 @@ local Players = game:GetService("Players")
 local ClientTransport = require(script.Parent.ClientTransport)
 local Simulation = require(script.Parent.Parent.Simulation)
 
+local Types = require(script.Parent.Parent.Types)
 local Enums = require(script.Parent.Parent.Enums)
 local EventType = Enums.EventType
 
@@ -28,7 +29,7 @@ DebugParts.Name = "DebugParts"
 DebugParts.Parent = workspace
 
 local SKIP_RESIMULATION = true
-local DEBUG_SPHERES = true
+local DEBUG_SPHERES = false
 local PRINT_NUM_CASTS = false
 
 local ClientCharacter = {}
@@ -42,10 +43,10 @@ ClientCharacter.__index = ClientCharacter
     @param position Vector3 -- The position to spawn this character, provided by the server.
     @return ClientCharacter
 ]=]
-function ClientCharacter.new(player: Player, position: Vector3)
+function ClientCharacter.new(player: Player, position: Vector3, config: Types.IClientConfig)
     local self = setmetatable({
         _player = player,
-        _simulation = Simulation.new(),
+        _simulation = Simulation.new(config.simulationConfig),
 
         _predictedCommands = {},
         _stateCache = {},

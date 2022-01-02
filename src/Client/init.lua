@@ -13,11 +13,23 @@ local Players = game:GetService("Players")
 local ClientTransport = require(script.ClientTransport)
 local ClientCharacter = require(script.ClientCharacter)
 
+local DefaultConfigs = require(script.Parent.DefaultConfigs)
+local Types = require(script.Parent.Types)
+local TableUtil = require(script.Parent.Vendor.TableUtil)
+
 local Enums = require(script.Parent.Enums)
 local EventType = Enums.EventType
 
 local ChickynoidClient = {}
 ChickynoidClient._characters = {}
+
+local ClientConfig = TableUtil.Copy(DefaultConfigs.DefaultClientConfig, true)
+
+function ChickynoidClient.SetConfig(config: Types.IClientConfig)
+    local newConfig = TableUtil.Reconcile(config, DefaultConfigs.DefaultClientConfig)
+    ClientConfig = newConfig
+    print("Set client config to:", ClientConfig)
+end
 
 --[=[
     Setup default connections for the client-side Chickynoid. This mostly
@@ -40,7 +52,7 @@ function ChickynoidClient.Setup()
         local position = event.position
         print("Character spawned at", position)
 
-        local character = ClientCharacter.new(Players.LocalPlayer, position)
+        local character = ClientCharacter.new(Players.LocalPlayer, position, ClientConfig)
         ChickynoidClient._characters[Players.LocalPlayer] = character
     end)
 

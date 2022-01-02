@@ -10,6 +10,7 @@
 
 local Transport = require(script.Parent.ServerTransport)
 
+local Types = require(script.Parent.Parent.Types)
 local Enums = require(script.Parent.Parent.Enums)
 local EventType = Enums.EventType
 
@@ -24,12 +25,12 @@ ServerCharacter.__index = ServerCharacter
     Constructs a new [ServerCharacter] and attaches it to the specified player.
     @return ServerCharacter
 ]=]
-function ServerCharacter.new(player: Player)
+function ServerCharacter.new(player: Player, config: Types.IServerConfig)
     local self = setmetatable({
         player = player,
 
         _transport = Transport.new(player),
-        _simulation = Simulation.new(),
+        _simulation = Simulation.new(config.simulationConfig),
 
         _unprocessedCommands = {},
         _lastConfirmedCommand = nil,
